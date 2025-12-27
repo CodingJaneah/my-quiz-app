@@ -154,11 +154,14 @@ my-quiz-app/
 3. **Set up environment variables**
    Create a `.env.local` file with your database credentials:
    ```env
-   DB_HOST=localhost
+   DB_HOST=your_database_host
+   DB_PORT=your_database_port
    DB_USER=your_username
    DB_PASSWORD=your_password
-   DB_NAME=quiz_app
+   DB_DATABASE=your_database_name
    ```
+
+   > ⚠️ **Important:** All environment variables are required. The application will not start without them.
 
 4. **Set up the database**
    Run the SQL scripts to create the necessary tables (users, quizzes, questions)
@@ -174,6 +177,80 @@ my-quiz-app/
 
 6. **Open the app**
    Navigate to [http://localhost:3000](http://localhost:3000) in your browser
+
+---
+
+## ☁️ Aiven Database Setup
+
+This application uses **Aiven MySQL** as a cloud-hosted database service. Follow these steps to configure your Aiven database:
+
+### Step 1: Create an Aiven Account
+1. Go to [Aiven.io](https://aiven.io/) and sign up for an account
+2. Verify your email and log in to the Aiven Console
+
+### Step 2: Create a MySQL Service
+1. In the Aiven Console, click **Create Service**
+2. Select **MySQL** as the service type
+3. Choose your preferred cloud provider (AWS, Google Cloud, Azure, etc.)
+4. Select a region close to your users for better performance
+5. Choose a plan (Free tier available for development)
+6. Name your service and click **Create Service**
+
+### Step 3: Get Connection Details
+Once your service is running, navigate to the **Overview** tab to find:
+
+| Parameter | Description | Example |
+|-----------|-------------|---------|
+| **Host** | Service hostname | `mysql-xxxxx-username-xxxx.i.aivencloud.com` |
+| **Port** | Connection port | `12165` |
+| **User** | Database username | `avnadmin` |
+| **Password** | Database password | (shown in console) |
+| **Database** | Default database name | `defaultdb` |
+
+### Step 4: Configure Environment Variables
+Create a `.env.local` file in your project root with your Aiven credentials:
+
+```env
+# Aiven MySQL Configuration
+DB_HOST=mysql-xxxxx-username-xxxx.i.aivencloud.com
+DB_PORT=12165
+DB_USER=avnadmin
+DB_PASSWORD=your_aiven_password
+DB_DATABASE=defaultdb
+```
+
+### Step 5: Create the Database Schema
+1. Connect to your Aiven MySQL using a client (MySQL Workbench, DBeaver, or CLI)
+2. Run the SQL scripts to create the required tables
+
+### Required Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `DB_HOST` | ✅ Yes | Aiven MySQL hostname |
+| `DB_PORT` | ✅ Yes | Aiven MySQL port |
+| `DB_USER` | ✅ Yes | Database username (default: `avnadmin`) |
+| `DB_PASSWORD` | ✅ Yes | Database password from Aiven console |
+| `DB_DATABASE` | ✅ Yes | Database name (default: `defaultdb`) |
+
+### Troubleshooting
+
+**Error: Missing required environment variables**
+- Ensure all five environment variables are set in `.env.local`
+- Restart the development server after adding/changing environment variables
+
+**Error: No database selected**
+- Verify `DB_DATABASE` is set correctly (not `DB_NAME`)
+- Check that the database exists in your Aiven service
+
+**Error: Connection refused**
+- Verify the host and port are correct
+- Check if your IP is whitelisted in Aiven (Service Settings > Allowed IP Addresses)
+- Ensure the Aiven service is running
+
+**SSL Connection Issues**
+- The application is configured to use SSL by default for Aiven connections
+- SSL is required for Aiven MySQL connections
 
 ---
 
