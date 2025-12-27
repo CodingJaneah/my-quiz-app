@@ -1,15 +1,25 @@
 import mysql, { Pool, RowDataPacket, ResultSetHeader } from 'mysql2/promise';
 
 /**
+ * Validate required environment variables
+ */
+const requiredEnvVars = ['DB_HOST', 'DB_USER', 'DB_PASSWORD', 'DB_DATABASE'];
+const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
+
+if (missingEnvVars.length > 0) {
+  console.error(`Missing required environment variables: ${missingEnvVars.join(', ')}`);
+}
+
+/**
  * MySQL connection pool instance
  * Configured using Aiven credentials for secure cloud database connection
  */
 const pool: Pool = mysql.createPool({
-  host: process.env.DB_HOST,
+  host: process.env.DB_HOST || 'missing-host',
   port: Number(process.env.DB_PORT) || 23681,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_DATABASE,
+  user: process.env.DB_USER || 'missing-user',
+  password: process.env.DB_PASSWORD || 'missing-password',
+  database: process.env.DB_DATABASE || 'missing-database',
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
