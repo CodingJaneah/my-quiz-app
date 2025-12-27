@@ -10,6 +10,14 @@ if (missingEnvVars.length > 0) {
   console.error(`Missing required environment variables: ${missingEnvVars.join(', ')}`);
 }
 
+// Log connection info for debugging (without password)
+console.log('DB Connection Config:', {
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  user: process.env.DB_USER,
+  database: process.env.DB_DATABASE,
+});
+
 /**
  * MySQL connection pool instance
  * Configured using Aiven credentials for secure cloud database connection
@@ -24,7 +32,7 @@ const pool: Pool = mysql.createPool({
   connectionLimit: 10,
   queueLimit: 0,
   ssl: {
-    rejectUnauthorized: true,
+    rejectUnauthorized: false,
   },
 });
 
