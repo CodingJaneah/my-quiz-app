@@ -27,7 +27,7 @@ export default function HtmlQuizzes() {
                     <h3 className="font-bold text-xl mb-2">Easy</h3>
                     <p className="text-gray-600 mb-4">Perfect for beginners learning JS basics.</p>
                     <span className="text-green-500 font-semibold block mb-4">10 Questions</span>
-                    <Link href="/quiz/html_quizzes/easy">
+                    <Link href="/quiz/js_quizzes/easy">
                         <button className="bg-(--secondary-color) hover:bg-(--hover-background) text-white py-2 px-6 rounded w-full">
                             Start Quiz
                         </button>
@@ -42,7 +42,7 @@ export default function HtmlQuizzes() {
                     <h3 className="font-bold text-xl mb-2">Medium</h3>
                     <p className="text-gray-600 mb-4">For those with some JS experience.</p>
                     <span className="text-yellow-500 font-semibold block mb-4">10 Questions</span>
-                    <Link href="/quiz/html_quizzes/medium">
+                    <Link href="/quiz/js_quizzes/medium">
                         <button className="bg-(--secondary-color) hover:bg-(--hover-background) text-white py-2 px-6 rounded w-full">
                             Start Quiz
                         </button>
@@ -57,7 +57,7 @@ export default function HtmlQuizzes() {
                     <h3 className="font-bold text-xl mb-2">Hard</h3>
                     <p className="text-gray-600 mb-4">Challenge yourself with advanced JS concepts.</p>
                     <span className="text-red-500 font-semibold block mb-4">10 Questions</span>
-                    <Link href="/quiz/html_quizzes/hard">
+                    <Link href="/quiz/js_quizzes/hard">
                         <button className="bg-(--secondary-color) hover:bg-(--hover-background) text-white py-2 px-6 rounded w-full">
                             Start Quiz
                         </button>
