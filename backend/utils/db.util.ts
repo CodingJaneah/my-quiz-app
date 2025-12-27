@@ -2,17 +2,20 @@ import mysql, { Pool, RowDataPacket, ResultSetHeader } from 'mysql2/promise';
 
 /**
  * MySQL connection pool instance
- * Configured using environment variables for secure database connection
+ * Configured using Aiven credentials for secure cloud database connection
  */
 const pool: Pool = mysql.createPool({
-  host: process.env.MYSQL_HOST,
-  port: Number(process.env.MYSQL_PORT) || 3306,
-  user: process.env.MYSQL_USER,
-  password: process.env.MYSQL_PASSWORD,
-  database: process.env.MYSQL_DATABASE,
+  host: process.env.DB_HOST,
+  port: Number(process.env.DB_PORT) || 23681,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_DATABASE,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
+  ssl: {
+    rejectUnauthorized: true,
+  },
 });
 
 /**
