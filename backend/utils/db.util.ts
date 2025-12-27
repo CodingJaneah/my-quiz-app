@@ -3,12 +3,21 @@ import mysql, { Pool, RowDataPacket, ResultSetHeader } from 'mysql2/promise';
 /**
  * Validate required environment variables
  */
-const requiredEnvVars = ['DB_HOST', 'DB_USER', 'DB_PASSWORD', 'DB_DATABASE'];
+const requiredEnvVars = ['DB_HOST', 'DB_PORT', 'DB_USER', 'DB_PASSWORD', 'DB_DATABASE'];
 const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
 
 if (missingEnvVars.length > 0) {
   console.error(`Missing required environment variables: ${missingEnvVars.join(', ')}`);
 }
+
+// Log all DB_ prefixed env vars for debugging
+console.log('All DB env vars:', {
+  DB_HOST: process.env.DB_HOST ? 'SET' : 'NOT SET',
+  DB_PORT: process.env.DB_PORT ? 'SET' : 'NOT SET',
+  DB_USER: process.env.DB_USER ? 'SET' : 'NOT SET',
+  DB_PASSWORD: process.env.DB_PASSWORD ? 'SET' : 'NOT SET',
+  DB_DATABASE: process.env.DB_DATABASE ? 'SET' : 'NOT SET',
+});
 
 // Log connection info for debugging (without password)
 console.log('DB Connection Config:', {
@@ -23,11 +32,11 @@ console.log('DB Connection Config:', {
  * Configured using Aiven credentials for secure cloud database connection
  */
 const pool: Pool = mysql.createPool({
-  host: process.env.DB_HOST || 'missing-host',
-  port: Number(process.env.DB_PORT) || 23681,
-  user: process.env.DB_USER || 'missing-user',
-  password: process.env.DB_PASSWORD || 'missing-password',
-  database: process.env.DB_DATABASE || 'missing-database',
+  host: process.env.DB_HOST,
+  port: Number(process.env.DB_PORT),
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_DATABASE,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
