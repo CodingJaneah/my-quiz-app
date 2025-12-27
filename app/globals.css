@@ -1,0 +1,110 @@
+@import "tailwindcss";
+
+:root {
+    --primary-color: #E6E6FA;
+    --header-color: #E0B0FF;
+    --secondary-color: #4B0082;
+    --hover-background: #280137;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Back Icon Styles */
+#back-icon {
+  display: inline-block;
+  margin: 20px 40px;
+}
+
+#back-icon a, #back-icon button {
+  color: var(--secondary-color);
+  text-decoration: none;
+  font-weight: bold;
+  padding: 8px 16px;
+  border: 2px solid var(--secondary-color);
+  border-radius: 8px;
+}
+
+/* HTML Outline Section */
+.html-outline {
+  padding: 20px 40px;
+  margin-bottom: 100px;
+}
+
+/* Contents Grid Layout */
+.contents {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+  padding: 0 0 20px 0;
+}
+
+/* Video Card Styles */
+.video-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.video-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+}
+
+.video-link {
+  text-decoration: none;
+  display: block;
+}
+
+.video-thumbnail {
+  background: linear-gradient(135deg, var(--secondary-color) 0%, var(--hover-background) 100%);
+  height: 160px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 20px;
+}
+
+.play-icon {
+  width: 50px;
+  height: 50px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  padding: 10px;
+  margin-bottom: 15px;
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.video-card:hover .play-icon {
+  transform: scale(1.1);
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.video-title {
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.4;
+}
