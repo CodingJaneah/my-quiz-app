@@ -12,13 +12,18 @@ export async function getUserQuizResults(userId: number): Promise<UserQuizResult
 import { executeQuery, executeUpdate } from '../utils/db.util';
 import { QuizQuestion, QuizResult, QuizAnswerSubmission } from '../models/quiz.model';
 
-import { UserQuizResult } from '../models/user_quiz_result.model';
+import { UserQuizResult, UserQuizResultInsert } from '../models/user_quiz_result.model';
 /**
  * Saves a user's quiz result to the database
  * @param result - UserQuizResult object
  * @returns The ID of the inserted result
  */
-export async function saveUserQuizResult(result: UserQuizResult): Promise<number> {
+/**
+ * Saves a user's quiz result to the database
+ * @param result - UserQuizResultInsert object (for insert only)
+ * @returns The ID of the inserted result
+ */
+export async function saveUserQuizResult(result: UserQuizResultInsert): Promise<number> {
     const query = `
         INSERT INTO user_quiz_results
         (user_id, quiz_type, difficulty, total_questions, correct_answers, score_percentage, passed, taken_at)

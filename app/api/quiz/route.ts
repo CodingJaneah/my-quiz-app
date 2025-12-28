@@ -1,7 +1,13 @@
+/**
+ * Handles quiz answer submissions and saves user quiz results.
+ * Validates request body, checks answers, calculates results, and persists them.
+ * @param req - Next.js API request object
+ * @returns JSON response with success or error
+ */
 import { NextRequest, NextResponse } from 'next/server';
 import { getQuizQuestions, validateQuizAnswers, saveUserQuizResult } from '@/backend/services/quiz.service';
 import { QuizAnswerSubmission } from '@/backend/models/quiz.model';
-import { UserQuizResult } from '@/backend/models/user_quiz_result.model';
+import { UserQuizResult, UserQuizResultInsert } from '@/backend/models/user_quiz_result.model';
 
 /**
  * GET /api/quiz
@@ -105,7 +111,8 @@ export async function POST(request: NextRequest) {
         const result = await validateQuizAnswers(answers);
 
         // Save the result to the database
-        const userQuizResult: UserQuizResult = {
+        // Prepare quiz result object for insertion (does not use RowDataPacket type)
+        const userQuizResult: UserQuizResultInsert = {
             user_id,
             quiz_type,
             difficulty,
