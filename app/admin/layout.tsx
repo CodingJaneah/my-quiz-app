@@ -43,13 +43,18 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         }
 
         // TODO: Fetch admin user from backend/session
-        if (!storedAdmin) {
-            // Not logged in, redirect to admin login
-            router.push("/admin/login");
-        } else {
-            setAdminUser(JSON.parse(storedAdmin));
-            setIsLoading(false);
-        }
+        // For now, always redirect to login (or implement your own logic)
+        // Example: fetch('/api/admin/me').then(...)
+        setIsLoading(false);
+        // Uncomment and implement your own logic below:
+        // fetch('/api/admin/me').then(res => res.json()).then(data => {
+        //   if (data.adminUser) {
+        //     setAdminUser(data.adminUser);
+        //     setIsLoading(false);
+        //   } else {
+        //     router.push("/admin/login");
+        //   }
+        // });
     }, [pathname, router]);
 
     // If on login page, render without sidebar
