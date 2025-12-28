@@ -4,10 +4,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
+import { useState, useEffect } from "react";
 
 export default function Header() {
   const pathname = usePathname();
   const { user, isAuthenticated, logout, isLoading } = useAuth();
+  // Avatar should be loaded from user context only
+  const avatarPreview = user?.avatar_url || null;
 
   return (
     <header className="text-black flex justify-between items-center cursor-pointer fixed top-0 right-0 left-0 z-1000" style={{ backgroundColor: '#E0B0FF' }}>
@@ -54,8 +57,12 @@ export default function Header() {
           <>
             <li className="list-none text-lg transition-all duration-300 relative group" style={{ paddingRight: '30px' }}>
               <span className="cursor-pointer text-black flex items-center">
-                <span className="user-initial flex items-center justify-center h-8 w-8 rounded-full bg-gray-300 text-black font-bold">
-                  {user?.username ? user.username.charAt(0).toUpperCase() : <i className="fa-solid fa-user"></i>}
+                <span className="user-initial flex items-center justify-center h-8 w-8 rounded-full bg-gray-300 text-black font-bold overflow-hidden">
+                  {avatarPreview ? (
+                    <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover rounded-full" />
+                  ) : (
+                    user?.username ? user.username.charAt(0).toUpperCase() : <i className="fa-solid fa-user"></i>
+                  )}
                 </span>
               </span>
               <ul className="hidden group-hover:block absolute top-full p-2.5 border border-[#ccc] min-w-[150px] mt-0 z-1000" style={{ backgroundColor: '#4B0082', right: '0' }}>

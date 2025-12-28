@@ -1,5 +1,41 @@
-import { executeQuery } from '../utils/db.util';
+/**
+ * Fetches all quiz results for a user
+ * @param userId - The user's ID
+ * @returns Array of UserQuizResult
+ */
+export async function getUserQuizResults(userId: number): Promise<UserQuizResult[]> {
+    const query = `
+        SELECT * FROM user_quiz_results WHERE user_id = ? ORDER BY taken_at DESC
+    `;
+    return await executeQuery<UserQuizResult[]>(query, [userId]);
+}
+import { executeQuery, executeUpdate } from '../utils/db.util';
 import { QuizQuestion, QuizResult, QuizAnswerSubmission } from '../models/quiz.model';
+
+import { UserQuizResult } from '../models/user_quiz_result.model';
+/**
+ * Saves a user's quiz result to the database
+ * @param result - UserQuizResult object
+ * @returns The ID of the inserted result
+ */
+export async function saveUserQuizResult(result: UserQuizResult): Promise<number> {
+    const query = `
+        INSERT INTO user_quiz_results
+        (user_id, quiz_type, difficulty, total_questions, correct_answers, score_percentage, passed, taken_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
+    `;
+    const params = [
+        result.user_id,
+        result.quiz_type,
+        result.difficulty,
+        result.total_questions,
+        result.correct_answers,
+        result.score_percentage,
+        result.passed ? 1 : 0
+    ];
+    const res = await executeUpdate(query, params);
+    return res.insertId;
+}
 
 /**
  * Fetches quiz questions by type and difficulty

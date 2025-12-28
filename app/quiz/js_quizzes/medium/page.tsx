@@ -4,6 +4,7 @@ import Header from "../../../../frontend/components/Header";
 import Footer from "@/frontend/components/Footer";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { useAuth } from "@/frontend/context/AuthContext";
 
 /**
  * Interface for quiz question without the correct answer
@@ -40,7 +41,13 @@ interface QuizResult {
  * Medium JavaScript Quiz Page
  * Displays 10 medium-level JavaScript quiz questions
  */
+/**
+ * Medium JavaScript Quiz Page
+ * Displays 10 medium-level JavaScript quiz questions
+ * Stores user results in the database for dashboard analytics
+ */
 export default function MediumJsQuiz() {
+    const { user } = useAuth();
     const [questions, setQuestions] = useState<QuizQuestionDisplay[]>([]);
     const [selectedAnswers, setSelectedAnswers] = useState<SelectedAnswers>({});
     const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -111,6 +118,9 @@ export default function MediumJsQuiz() {
     /**
      * Submits quiz answers for grading
      */
+    /**
+     * Submits quiz answers for grading and stores result in DB
+     */
     const handleSubmitQuiz = async () => {
         if (Object.keys(selectedAnswers).length < questions.length) {
             alert('Please answer all questions before submitting.');
@@ -124,12 +134,18 @@ export default function MediumJsQuiz() {
                 selected_answer: answer
             }));
 
+            // Send user_id, quiz_type, and difficulty for result tracking
             const response = await fetch('/api/quiz', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ answers })
+                body: JSON.stringify({
+                    answers,
+                    user_id: user?.id,
+                    quiz_type: 'javascript',
+                    difficulty: 'medium'
+                })
             });
 
             const data = await response.json();

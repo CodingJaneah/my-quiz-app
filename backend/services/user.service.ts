@@ -1,3 +1,38 @@
+/**
+ * Updates a user's avatar_url by user_id
+ * @param userId - User's ID
+ * @param avatarUrl - New avatar URL
+ * @returns Updated user object or null if not found
+ */
+export async function updateUserAvatar(userId: number, avatarUrl: string): Promise<Omit<User, 'password'> | null> {
+    const updateQuery = 'UPDATE users SET avatar_url = ?, updated_at = NOW() WHERE id = ?';
+    const result = await executeUpdate(updateQuery, [avatarUrl, userId]);
+    if (result.affectedRows === 0) {
+        return null;
+    }
+    // Return updated user (without password)
+    const selectQuery = 'SELECT id, username, email, avatar_url, created_at, updated_at FROM users WHERE id = ?';
+    const rows = await executeQuery<(Omit<User, 'password'> & RowDataPacket)[]>(selectQuery, [userId]);
+    return rows.length > 0 ? rows[0] : null;
+}
+/**
+ * Updates a user's profile (username, email) by user_id
+ * @param userId - User's ID
+ * @param username - New username
+ * @param email - New email
+ * @returns Updated user object or null if not found
+ */
+export async function updateUserProfile(userId: number, username: string, email: string): Promise<Omit<User, 'password'> | null> {
+    const updateQuery = 'UPDATE users SET username = ?, email = ?, updated_at = NOW() WHERE id = ?';
+    const result = await executeUpdate(updateQuery, [username, email, userId]);
+    if (result.affectedRows === 0) {
+        return null;
+    }
+    // Return updated user (without password)
+    const selectQuery = 'SELECT id, username, email, created_at, updated_at FROM users WHERE id = ?';
+    const rows = await executeQuery<(Omit<User, 'password'> & RowDataPacket)[]>(selectQuery, [userId]);
+    return rows.length > 0 ? rows[0] : null;
+}
 import { executeQuery, executeUpdate } from '../utils/db.util';
 import { User, CreateUserDto } from '../models/user.model';
 import { RowDataPacket } from 'mysql2';

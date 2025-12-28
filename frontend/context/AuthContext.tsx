@@ -11,6 +11,8 @@ interface User {
     username: string;
     email: string;
     created_at?: string;
+    avatar_url?: string;
+    // Add other fields as needed
 }
 
 /**
@@ -35,18 +37,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const router = useRouter();
 
-    // Check for existing user session on mount
+    // Check for existing user session on mount and fetch latest user data from backend
     useEffect(() => {
-        const storedUser = localStorage.getItem("user");
-        if (storedUser) {
+        const fetchAndSetUser = async () => {
+            setIsLoading(true);
             try {
-                setUser(JSON.parse(storedUser));
+                const res = await fetch('/api/user-info/me');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.user) {
+                        setUser(data.user);
+                    } else {
+                        setUser(null);
+                    }
+                } else {
+                    setUser(null);
+                }
             } catch (error) {
-                console.error("Error parsing stored user:", error);
-                localStorage.removeItem("user");
+                setUser(null);
             }
-        }
-        setIsLoading(false);
+            setIsLoading(false);
+        };
+        fetchAndSetUser();
     }, []);
 
     /**
@@ -55,7 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
      */
     const login = (userData: User): void => {
         setUser(userData);
-        localStorage.setItem("user", JSON.stringify(userData));
+        // Optionally, send login info to backend/session
     };
 
     /**
@@ -63,7 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
      */
     const logout = (): void => {
         setUser(null);
-        localStorage.removeItem("user");
+        // Optionally, clear backend/session
         router.push("/login");
     };
 
@@ -75,6 +87,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoading,
     };
 
+    // Expose updateAuthUser globally for profile update
+    if (typeof window !== 'undefined') {
+        (window as any).updateAuthUser = setUser;
+    }
     return (
         <AuthContext.Provider value={value}>
             {children}

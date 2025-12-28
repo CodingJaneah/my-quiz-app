@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getQuizQuestions, validateQuizAnswers } from '@/backend/services/quiz.service';
+import { getQuizQuestions, validateQuizAnswers, saveUserQuizResult } from '@/backend/services/quiz.service';
 import { QuizAnswerSubmission } from '@/backend/models/quiz.model';
+import { UserQuizResult } from '@/backend/models/user_quiz_result.model';
 
 /**
  * GET /api/quiz
@@ -66,15 +67,18 @@ export async function GET(request: NextRequest) {
  * Submits quiz answers and returns the score
  * Body: { answers: [{ question_id: number, selected_answer: string }] }
  */
+// POST /api/quiz
+// Body: { answers: QuizAnswerSubmission[], user_id: number, quiz_type: string, difficulty: string }
 export async function POST(request: NextRequest) {
     try {
+
         const body = await request.json();
-        const { answers } = body as { answers: QuizAnswerSubmission[] };
+        const { answers, user_id, quiz_type, difficulty } = body as { answers: QuizAnswerSubmission[], user_id: number, quiz_type: string, difficulty: string };
 
         // Validate request body
-        if (!answers || !Array.isArray(answers) || answers.length === 0) {
+        if (!answers || !Array.isArray(answers) || answers.length === 0 || !user_id || !quiz_type || !difficulty) {
             return NextResponse.json(
-                { error: 'Invalid request body. Expected: { answers: [...] }' },
+                { error: 'Invalid request body. Expected: { answers, user_id, quiz_type, difficulty }' },
                 { status: 400 }
             );
         }
@@ -97,7 +101,20 @@ export async function POST(request: NextRequest) {
             }
         }
 
+
         const result = await validateQuizAnswers(answers);
+
+        // Save the result to the database
+        const userQuizResult: UserQuizResult = {
+            user_id,
+            quiz_type,
+            difficulty,
+            total_questions: result.total_questions,
+            correct_answers: result.correct_answers,
+            score_percentage: result.score_percentage,
+            passed: result.passed
+        };
+        await saveUserQuizResult(userQuizResult);
 
         return NextResponse.json({
             success: true,

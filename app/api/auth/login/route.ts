@@ -51,11 +51,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         // Login successful - return user data (excluding password)
         const { password: _, ...userWithoutPassword } = user;
 
-        return NextResponse.json({
+        // Set user_id cookie for session
+        const response = NextResponse.json({
             success: true,
             message: 'Login successful',
             user: userWithoutPassword
         });
+        response.headers.append('Set-Cookie', `user_id=${user.id}; Path=/; HttpOnly; SameSite=Lax`);
+        return response;
 
     } catch (error) {
         console.error('Login error:', error);

@@ -44,7 +44,7 @@ export default function AdminLoginPage() {
 
             if (data.success) {
                 // Store admin session
-                localStorage.setItem("adminUser", JSON.stringify(data.user));
+                // TODO: Set admin user in backend/session
                 router.push("/admin/dashboard");
             } else {
                 setError(data.error || "Invalid email or password");

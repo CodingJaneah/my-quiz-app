@@ -2,7 +2,18 @@
 
 import Link from "next/link";
 import { useAuth } from "../../frontend/context/AuthContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+interface UserQuizResult {
+    id: number;
+    user_id: number;
+    quiz_type: string;
+    difficulty: string;
+    total_questions: number;
+    correct_answers: number;
+    score_percentage: number;
+    passed: boolean;
+    taken_at: string;
+}
 
 /**
  * Interface for quiz statistics
@@ -24,7 +35,7 @@ interface QuizStats {
  */
 export default function UserDashboard() {
     const { user } = useAuth();
-    const [stats] = useState<QuizStats>({
+    const [stats, setStats] = useState<QuizStats>({
         totalQuizzesTaken: 0,
         averageScore: 0,
         bestScore: 0,
@@ -34,10 +45,40 @@ export default function UserDashboard() {
             javascript: { taken: 0, avgScore: 0 }
         }
     });
+    const [results, setResults] = useState<UserQuizResult[]>([]);
+
+    useEffect(() => {
+        if (!user) return;
+        fetch(`/api/user-results?user_id=${user.id}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    setResults(data.results);
+                    // Calculate stats
+                    const total = data.results.length;
+                    const avg = total > 0 ? Math.round(data.results.reduce((sum: number, r: UserQuizResult) => sum + r.score_percentage, 0) / total) : 0;
+                    const best = total > 0 ? Math.max(...data.results.map((r: UserQuizResult) => r.score_percentage)) : 0;
+                    const html = data.results.filter((r: UserQuizResult) => r.quiz_type === 'html');
+                    const css = data.results.filter((r: UserQuizResult) => r.quiz_type === 'css');
+                    const js = data.results.filter((r: UserQuizResult) => r.quiz_type === 'javascript');
+                    setStats({
+                        totalQuizzesTaken: total,
+                        averageScore: avg,
+                        bestScore: best,
+                        topicStats: {
+                            html: { taken: html.length, avgScore: html.length > 0 ? Math.round(html.reduce((sum: number, r: UserQuizResult) => sum + r.score_percentage, 0) / html.length) : 0 },
+                            css: { taken: css.length, avgScore: css.length > 0 ? Math.round(css.reduce((sum: number, r: UserQuizResult) => sum + r.score_percentage, 0) / css.length) : 0 },
+                            javascript: { taken: js.length, avgScore: js.length > 0 ? Math.round(js.reduce((sum: number, r: UserQuizResult) => sum + r.score_percentage, 0) / js.length) : 0 }
+                        }
+                    });
+                }
+            });
+    }, [user]);
 
     return (
         <div className="px-10 pt-[130px] pb-[100px]">
             <div className="max-w-5xl">
+                
                     {/* Welcome Section */}
                     <div className="mb-8">
                         <h1 className="font-bold text-3xl mb-2">
@@ -180,6 +221,48 @@ export default function UserDashboard() {
                             </Link>
                         </div>
                     </div>
+
+                    {/* Quiz History Table */}
+                <div className="mb-8 mt-4">
+                    <h2 className="font-bold text-xl mb-4">Quiz History</h2>
+                    <div className="overflow-x-auto">
+                    <table className="min-w-full bg-white border border-gray-200 rounded-lg">
+                        <thead>
+                            <tr>
+                                <th className="py-2 px-4 border-b">Date</th>
+                                <th className="py-2 px-4 border-b">Type</th>
+                                <th className="py-2 px-4 border-b">Difficulty</th>
+                                <th className="py-2 px-4 border-b">Score</th>
+                                <th className="py-2 px-4 border-b">Result</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {results.length === 0 ? (
+                                <tr><td colSpan={5} className="text-center py-4 text-gray-500">No quiz attempts yet.</td></tr>
+                            ) : (
+                                results
+                                    .slice(0, 5)
+                                    .map(r => (
+                                        <tr key={r.id}>
+                                            <td className="py-2 px-4 border-b">{new Date(r.taken_at).toLocaleString()}</td>
+                                            <td className="py-2 px-4 border-b capitalize">{r.quiz_type}</td>
+                                            <td className="py-2 px-4 border-b capitalize">{r.difficulty}</td>
+                                            <td className="py-2 px-4 border-b">{r.score_percentage}%</td>
+                                            <td className="py-2 px-4 border-b">{r.passed ? 'Passed' : 'Failed'}</td>
+                                        </tr>
+                                    ))
+                            )}
+                        </tbody>
+                    </table>
+                    </div>
+                    {results.length > 5 && (
+                        <div className="mt-2 text-center">
+                            <Link href="/dashboard/results" className="text-(--secondary-color) hover:underline font-semibold">
+                                View All Results
+                            </Link>
+                        </div>
+                    )}
+                </div>
                 </div>
             </div>
     );

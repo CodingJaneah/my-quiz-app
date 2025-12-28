@@ -12,7 +12,7 @@ interface AdminLayoutProps {
 }
 
 /**
- * Interface for Admin User stored in localStorage
+ * Interface for Admin User
  */
 interface AdminUser {
     id: number;
@@ -42,7 +42,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             return;
         }
 
-        const storedAdmin = localStorage.getItem("adminUser");
+        // TODO: Fetch admin user from backend/session
         if (!storedAdmin) {
             // Not logged in, redirect to admin login
             router.push("/admin/login");
@@ -241,7 +241,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                                     <button
                                         onClick={() => {
                                             // Clear admin session and redirect to admin login
-                                            localStorage.removeItem("adminUser");
+                                            // TODO: Remove admin user from backend/session
                                             window.location.href = "/admin/login";
                                         }}
                                         className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors"

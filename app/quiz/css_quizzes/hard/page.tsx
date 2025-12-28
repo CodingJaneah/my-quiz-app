@@ -4,6 +4,7 @@ import Header from "../../../../frontend/components/Header";
 import Footer from "@/frontend/components/Footer";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { useAuth } from "@/frontend/context/AuthContext";
 
 /**
  * Interface for quiz question without the correct answer
@@ -41,6 +42,7 @@ interface QuizResult {
  * Displays 10 hard-level CSS quiz questions
  */
 export default function HardCssQuiz() {
+    const { user } = useAuth();
     const [questions, setQuestions] = useState<QuizQuestionDisplay[]>([]);
     const [selectedAnswers, setSelectedAnswers] = useState<SelectedAnswers>({});
     const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -124,12 +126,23 @@ export default function HardCssQuiz() {
                 selected_answer: answer
             }));
 
+            if (!user) {
+                alert('You must be logged in to submit your quiz and track progress.');
+                setIsSubmitting(false);
+                return;
+            }
+
             const response = await fetch('/api/quiz', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ answers })
+                body: JSON.stringify({
+                    answers,
+                    user_id: user.id,
+                    quiz_type: 'css',
+                    difficulty: 'hard'
+                })
             });
 
             const data = await response.json();
