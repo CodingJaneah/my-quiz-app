@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import path from 'path';
-import fs from 'fs/promises';
+import { uploadToCloudinary } from '../../../../backend/utils/cloudinary.util';
+import { updateUserAvatar } from '../../../../backend/services/user.service';
 
 /**
  * API Route: /api/user/avatar-upload
@@ -17,25 +17,28 @@ export async function POST(req: NextRequest) {
         if (!file || !userId) {
             return NextResponse.json({ success: false, error: 'Missing file or user_id' }, { status: 400 });
         }
+        const userIdNum = Number(userId);
+        if (isNaN(userIdNum)) {
+            return NextResponse.json({ success: false, error: 'Invalid user_id' }, { status: 400 });
+        }
 
-        // Generate unique filename
-        const ext = file.name.split('.').pop();
-        const fileName = `avatar_${userId}_${Date.now()}.${ext}`;
-        const avatarsDir = path.join(process.cwd(), 'public', 'avatars');
-        const filePath = path.join(avatarsDir, fileName);
-        const publicUrl = `/avatars/${fileName}`;
-
-        // Ensure avatars directory exists
-        await fs.mkdir(avatarsDir, { recursive: true });
 
         // Read file buffer
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
 
-        // Save file
-        await fs.writeFile(filePath, buffer);
+        // Upload to Cloudinary
+        const ext = file.name.split('.').pop();
+        const fileName = `avatar_${userId}_${Date.now()}.${ext}`;
+        const cloudinaryUrl = await uploadToCloudinary(buffer, fileName);
 
-        return NextResponse.json({ success: true, avatar_url: publicUrl });
+        // Update user's avatar_url in the database
+        const updatedUser = await updateUserAvatar(userIdNum, cloudinaryUrl);
+        if (!updatedUser) {
+            return NextResponse.json({ success: false, error: 'User not found or update failed' }, { status: 404 });
+        }
+
+        return NextResponse.json({ success: true, avatar_url: cloudinaryUrl, user: updatedUser });
     } catch (error) {
         console.error('Avatar upload error:', error);
         return NextResponse.json({ success: false, error: 'Failed to upload avatar' }, { status: 500 });
