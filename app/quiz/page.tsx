@@ -1,7 +1,7 @@
 "use client";
 
-import Header from "../../frontend/components/Header";
-import Footer from "@/frontend/components/Footer";
+import Header from "../../frontend/components/layout/Header";
+import Footer from "@/frontend/components/layout/Footer";
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/frontend/context/AuthContext';

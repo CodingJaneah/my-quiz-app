@@ -6,6 +6,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { getQuizQuestions, validateQuizAnswers, saveUserQuizResult } from '@/backend/services/quiz.service';
+import { saveUserQuizAnswersBulk } from '@/backend/services/user_quiz_answer.service';
 import { QuizAnswerSubmission } from '@/backend/models/quiz.model';
 import { UserQuizResult, UserQuizResultInsert } from '@/backend/models/user_quiz_result.model';
 
@@ -46,7 +47,9 @@ export async function GET(request: NextRequest) {
             );
         }
 
-        const questions = await getQuizQuestions(quizType, difficulty);
+        const countParam = searchParams.get('count');
+        const count = countParam ? parseInt(countParam, 10) : undefined;
+        const questions = await getQuizQuestions(quizType, difficulty, count);
 
         // Remove correct_answer from response to prevent cheating
         const questionsWithoutAnswers = questions.map(({ correct_answer, ...rest }) => rest);
@@ -121,7 +124,19 @@ export async function POST(request: NextRequest) {
             score_percentage: result.score_percentage,
             passed: result.passed
         };
-        await saveUserQuizResult(userQuizResult);
+
+                // Save the quiz result summary
+                await saveUserQuizResult(userQuizResult);
+
+                // Save each answer to user_quiz_answers
+                const answerRecords = answers.map(a => ({
+                    user_id,
+                    quiz_type,
+                    difficulty,
+                    question_id: a.question_id,
+                    selected_answer: a.selected_answer
+                }));
+                await saveUserQuizAnswersBulk(answerRecords);
 
         return NextResponse.json({
             success: true,

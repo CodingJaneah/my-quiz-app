@@ -50,9 +50,11 @@ export async function saveUserQuizResult(result: UserQuizResultInsert): Promise<
  */
 export async function getQuizQuestions(
     quizType: string,
-    difficulty: string
+    difficulty: string,
+    count?: number
 ): Promise<QuizQuestion[]> {
-    const query = `
+    // Build base query
+    let query = `
         SELECT 
             q.id AS question_id,
             q.quiz_id,
@@ -67,11 +69,17 @@ export async function getQuizQuestions(
         FROM questions q
         JOIN quizzes qz ON q.quiz_id = qz.id
         WHERE qz.quiz_type = ? AND qz.difficulty = ?
-        ORDER BY RAND()
-        LIMIT 10
-    `;
-    
-    const questions = await executeQuery<QuizQuestion[]>(query, [quizType, difficulty]);
+        ORDER BY RAND()`;
+
+    const params: any[] = [quizType, difficulty];
+
+    // If a count is provided, limit the results; otherwise return all available questions
+    if (typeof count === 'number' && Number.isFinite(count) && count > 0) {
+        query += `\n        LIMIT ?`;
+        params.push(count);
+    }
+
+    const questions = await executeQuery<QuizQuestion[]>(query, params);
     return questions;
 }
 

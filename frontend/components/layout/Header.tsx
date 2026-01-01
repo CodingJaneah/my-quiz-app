@@ -3,13 +3,12 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "@/frontend/context/AuthContext";
 import { useState, useEffect } from "react";
 
 export default function Header() {
   const pathname = usePathname();
   const { user, isAuthenticated, logout, isLoading } = useAuth();
-  // Avatar should be loaded from user context only
   const avatarPreview = user?.avatar_url || null;
 
   return (

@@ -3,6 +3,9 @@
 import Link from "next/link";
 import { useAuth } from "../../frontend/context/AuthContext";
 import { useState, useEffect } from "react";
+import StatCard from "@/frontend/components/dashboard/StatCard";
+import QuickActionCard from "@/frontend/components/dashboard/QuickActionCard";
+import TopicProgress from "@/frontend/components/dashboard/TopicProgress";
 interface UserQuizResult {
     id: number;
     user_id: number;
@@ -54,21 +57,29 @@ export default function UserDashboard() {
             .then(data => {
                 if (data.success) {
                     setResults(data.results);
-                    // Calculate stats
-                    const total = data.results.length;
-                    const avg = total > 0 ? Math.round(data.results.reduce((sum: number, r: UserQuizResult) => sum + r.score_percentage, 0) / total) : 0;
-                    const best = total > 0 ? Math.max(...data.results.map((r: UserQuizResult) => r.score_percentage)) : 0;
+                    // Calculate unique quizzes taken (by quiz_type + difficulty)
+                    const uniqueQuizSet = new Set(
+                        data.results.map((r: UserQuizResult) => `${r.quiz_type}:${r.difficulty}`)
+                    );
+                    const totalUnique = uniqueQuizSet.size;
+                    const avg = data.results.length > 0 ? Math.round(data.results.reduce((sum: number, r: UserQuizResult) => sum + r.score_percentage, 0) / data.results.length) : 0;
+                    const best = data.results.length > 0 ? Math.max(...data.results.map((r: UserQuizResult) => r.score_percentage)) : 0;
+                    // Arrays for each topic
                     const html = data.results.filter((r: UserQuizResult) => r.quiz_type === 'html');
                     const css = data.results.filter((r: UserQuizResult) => r.quiz_type === 'css');
                     const js = data.results.filter((r: UserQuizResult) => r.quiz_type === 'javascript');
+                    // Unique quizzes per topic (by quiz_type + difficulty)
+                    const htmlUnique = new Set(html.map((r: UserQuizResult) => `${r.quiz_type}:${r.difficulty}`)).size;
+                    const cssUnique = new Set(css.map((r: UserQuizResult) => `${r.quiz_type}:${r.difficulty}`)).size;
+                    const jsUnique = new Set(js.map((r: UserQuizResult) => `${r.quiz_type}:${r.difficulty}`)).size;
                     setStats({
-                        totalQuizzesTaken: total,
+                        totalQuizzesTaken: totalUnique,
                         averageScore: avg,
                         bestScore: best,
                         topicStats: {
-                            html: { taken: html.length, avgScore: html.length > 0 ? Math.round(html.reduce((sum: number, r: UserQuizResult) => sum + r.score_percentage, 0) / html.length) : 0 },
-                            css: { taken: css.length, avgScore: css.length > 0 ? Math.round(css.reduce((sum: number, r: UserQuizResult) => sum + r.score_percentage, 0) / css.length) : 0 },
-                            javascript: { taken: js.length, avgScore: js.length > 0 ? Math.round(js.reduce((sum: number, r: UserQuizResult) => sum + r.score_percentage, 0) / js.length) : 0 }
+                            html: { taken: htmlUnique, avgScore: html.length > 0 ? Math.round(html.reduce((sum: number, r: UserQuizResult) => sum + r.score_percentage, 0) / html.length) : 0 },
+                            css: { taken: cssUnique, avgScore: css.length > 0 ? Math.round(css.reduce((sum: number, r: UserQuizResult) => sum + r.score_percentage, 0) / css.length) : 0 },
+                            javascript: { taken: jsUnique, avgScore: js.length > 0 ? Math.round(js.reduce((sum: number, r: UserQuizResult) => sum + r.score_percentage, 0) / js.length) : 0 }
                         }
                     });
                 }
@@ -89,60 +100,18 @@ export default function UserDashboard() {
 
                     {/* Stats Overview */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                        <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-md">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-gray-500 text-sm">Total Quizzes Taken</p>
-                                    <p className="text-3xl font-bold text-(--secondary-color)">{stats.totalQuizzesTaken}</p>
-                                </div>
-                                <div className="text-4xl">📝</div>
-                            </div>
-                        </div>
-                        <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-md">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-gray-500 text-sm">Average Score</p>
-                                    <p className="text-3xl font-bold text-green-500">{stats.averageScore}%</p>
-                                </div>
-                                <div className="text-4xl">📊</div>
-                            </div>
-                        </div>
-                        <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-md">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-gray-500 text-sm">Best Score</p>
-                                    <p className="text-3xl font-bold text-yellow-500">{stats.bestScore}%</p>
-                                </div>
-                                <div className="text-4xl">🏆</div>
-                            </div>
-                        </div>
+                        <StatCard title="Total Quizzes Taken" value={stats.totalQuizzesTaken} icon={<span>📝</span>} href="/dashboard/unique-quizzes" />
+                        <StatCard title="Average Score" value={`${stats.averageScore}%`} icon={<span>📊</span>} />
+                        <StatCard title="Best Score" value={`${stats.bestScore}%`} icon={<span>🏆</span>} />
                     </div>
 
                     {/* Quick Actions */}
                     <div className="mb-8">
                         <h2 className="font-bold text-xl mb-4">Quick Actions</h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <Link href="/quiz/html_quizzes" className="block">
-                                <div className="bg-orange-100 border border-orange-200 rounded-lg p-6 hover:shadow-lg transition-shadow cursor-pointer">
-                                    <div className="text-3xl mb-2">🟠</div>
-                                    <h3 className="font-semibold text-lg">HTML Quizzes</h3>
-                                    <p className="text-gray-600 text-sm">Test your HTML knowledge</p>
-                                </div>
-                            </Link>
-                            <Link href="/quiz/css_quizzes" className="block">
-                                <div className="bg-blue-100 border border-blue-200 rounded-lg p-6 hover:shadow-lg transition-shadow cursor-pointer">
-                                    <div className="text-3xl mb-2">🔵</div>
-                                    <h3 className="font-semibold text-lg">CSS Quizzes</h3>
-                                    <p className="text-gray-600 text-sm">Test your CSS knowledge</p>
-                                </div>
-                            </Link>
-                            <Link href="/quiz/js_quizzes" className="block">
-                                <div className="bg-yellow-100 border border-yellow-200 rounded-lg p-6 hover:shadow-lg transition-shadow cursor-pointer">
-                                    <div className="text-3xl mb-2">🟡</div>
-                                    <h3 className="font-semibold text-lg">JavaScript Quizzes</h3>
-                                    <p className="text-gray-600 text-sm">Test your JS knowledge</p>
-                                </div>
-                            </Link>
+                            <QuickActionCard href="/quiz/html_quizzes" bgClass="bg-orange-100 border border-orange-200" emoji={<span>🟠</span>} title="HTML Quizzes" desc="Test your HTML knowledge" />
+                            <QuickActionCard href="/quiz/css_quizzes" bgClass="bg-blue-100 border border-blue-200" emoji={<span>🔵</span>} title="CSS Quizzes" desc="Test your CSS knowledge" />
+                            <QuickActionCard href="/quiz/js_quizzes" bgClass="bg-yellow-100 border border-yellow-200" emoji={<span>🟡</span>} title="JavaScript Quizzes" desc="Test your JS knowledge" />
                         </div>
                     </div>
 
@@ -150,50 +119,9 @@ export default function UserDashboard() {
                     <div className="mb-8">
                         <h2 className="font-bold text-xl mb-4">Your Progress by Topic</h2>
                         <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-md">
-                            {/* HTML Progress */}
-                            <div className="mb-6">
-                                <div className="flex justify-between items-center mb-2">
-                                    <span className="font-semibold text-orange-500">HTML</span>
-                                    <span className="text-sm text-gray-500">{stats.topicStats.html.taken} quizzes taken</span>
-                                </div>
-                                <div className="w-full bg-gray-200 rounded-full h-3">
-                                    <div 
-                                        className="bg-orange-500 h-3 rounded-full transition-all duration-300"
-                                        style={{ width: `${stats.topicStats.html.avgScore}%` }}
-                                    ></div>
-                                </div>
-                                <p className="text-right text-sm text-gray-500 mt-1">Avg: {stats.topicStats.html.avgScore}%</p>
-                            </div>
-
-                            {/* CSS Progress */}
-                            <div className="mb-6">
-                                <div className="flex justify-between items-center mb-2">
-                                    <span className="font-semibold text-blue-500">CSS</span>
-                                    <span className="text-sm text-gray-500">{stats.topicStats.css.taken} quizzes taken</span>
-                                </div>
-                                <div className="w-full bg-gray-200 rounded-full h-3">
-                                    <div 
-                                        className="bg-blue-500 h-3 rounded-full transition-all duration-300"
-                                        style={{ width: `${stats.topicStats.css.avgScore}%` }}
-                                    ></div>
-                                </div>
-                                <p className="text-right text-sm text-gray-500 mt-1">Avg: {stats.topicStats.css.avgScore}%</p>
-                            </div>
-
-                            {/* JavaScript Progress */}
-                            <div>
-                                <div className="flex justify-between items-center mb-2">
-                                    <span className="font-semibold text-yellow-500">JavaScript</span>
-                                    <span className="text-sm text-gray-500">{stats.topicStats.javascript.taken} quizzes taken</span>
-                                </div>
-                                <div className="w-full bg-gray-200 rounded-full h-3">
-                                    <div 
-                                        className="bg-yellow-500 h-3 rounded-full transition-all duration-300"
-                                        style={{ width: `${stats.topicStats.javascript.avgScore}%` }}
-                                    ></div>
-                                </div>
-                                <p className="text-right text-sm text-gray-500 mt-1">Avg: {stats.topicStats.javascript.avgScore}%</p>
-                            </div>
+                            <TopicProgress name="HTML" taken={stats.topicStats.html.taken} avgScore={stats.topicStats.html.avgScore} colorClass="orange" />
+                            <TopicProgress name="CSS" taken={stats.topicStats.css.taken} avgScore={stats.topicStats.css.avgScore} colorClass="blue" />
+                            <TopicProgress name="JavaScript" taken={stats.topicStats.javascript.taken} avgScore={stats.topicStats.javascript.avgScore} colorClass="yellow" />
                         </div>
                     </div>
 

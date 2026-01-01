@@ -1,7 +1,7 @@
 "use client";
 
-import Header from "../../../../frontend/components/Header";
-import Footer from "@/frontend/components/Footer";
+import Header from "../../../../frontend/components/layout/Header";
+import Footer from "@/frontend/components/layout/Footer";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/frontend/context/AuthContext";
@@ -55,8 +55,41 @@ export default function EasyCssQuiz() {
      * Fetches quiz questions on component mount
      */
     useEffect(() => {
-        fetchQuestions();
-    }, []);
+        const fetchAll = async () => {
+            setIsLoading(true);
+            try {
+                // Fetch questions first
+                const response = await fetch('/api/quiz?type=css&difficulty=easy');
+                const data = await response.json();
+                if (data.success) {
+                    setQuestions(data.questions);
+
+                    // Then fetch previous answers if user is logged in
+                    if (user?.id) {
+                        const res = await fetch(`/api/user-answers?user_id=${user.id}&quiz_type=css&difficulty=easy`);
+                        if (res.ok) {
+                            const ansData = await res.json();
+                            if (ansData.answers && Array.isArray(ansData.answers) && ansData.answers.length > 0) {
+                                const prev: SelectedAnswers = {};
+                                ansData.answers.forEach((a: any) => {
+                                    prev[a.question_id] = a.selected_answer;
+                                });
+                                setSelectedAnswers(prev);
+                            }
+                        }
+                    }
+                } else {
+                    setError(data.error || 'Failed to load questions');
+                }
+            } catch (err) {
+                setError('Failed to connect to the server');
+                console.error('Error fetching questions:', err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchAll();
+    }, [user]);
 
     /**
      * Fetches quiz questions from the API

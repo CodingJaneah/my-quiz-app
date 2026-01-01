@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { setCookie } from "@/frontend/utils/cookie.util";
 
 /**
  * Admin Login Page
@@ -40,13 +41,21 @@ export default function AdminLoginPage() {
                 body: JSON.stringify({ email, password })
             });
 
-            const data = await response.json();
+                        const data = await response.json();
 
-            if (data.success) {
-                // Store admin session
-                // TODO: Set admin user in backend/session
-                router.push("/admin/dashboard");
-            } else {
+                        if (data.success && data.user) {
+                                // Store admin session as a JSON string with id, email, and role
+                                setCookie(
+                                    "admin_session",
+                                    JSON.stringify({
+                                        id: data.user.id,
+                                        email: data.user.email,
+                                        role: data.user.role,
+                                    }),
+                                    1
+                                );
+                                router.push("/admin/dashboard");
+                        } else {
                 setError(data.error || "Invalid email or password");
             }
         } catch (err) {

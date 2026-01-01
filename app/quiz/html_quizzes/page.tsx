@@ -1,12 +1,18 @@
-import Header from "../../../frontend/components/Header";
-import Footer from "@/frontend/components/Footer";
+"use client";
+import Header from "../../../frontend/components/layout/Header";
+import Footer from "@/frontend/components/layout/Footer";
 import Link from "next/link";
+import { useQuizStatus } from "../../../frontend/utils/useQuizStatus";
 
 /**
  * HTML Quizzes landing page
  * Displays options for easy, medium, and hard HTML quizzes
  */
 export default function HtmlQuizzes() {
+    // Use the custom hook for each difficulty
+    const easyStatus = useQuizStatus('html', 'easy');
+    const mediumStatus = useQuizStatus('html', 'medium');
+    const hardStatus = useQuizStatus('html', 'hard');
     return (
         <>
         <Header />
@@ -20,7 +26,13 @@ export default function HtmlQuizzes() {
 
             <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 mb-[200px] max-w-4xl mx-auto">
                 {/* Easy Quiz Card */}
-                <div className="border border-gray-300 rounded-lg p-6 shadow-md text-center hover:shadow-lg transition-shadow">
+                <div className="border border-gray-300 rounded-lg p-6 shadow-md text-center hover:shadow-lg transition-shadow relative">
+                    {/* Status label top right */}
+                    {easyStatus && (
+                      <span className={`absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-semibold z-10 ${easyStatus === 'completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                        {easyStatus === 'completed' ? 'Completed' : 'Ongoing'}
+                      </span>
+                    )}
                     <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <span className="text-3xl">🌱</span>
                     </div>
@@ -35,7 +47,12 @@ export default function HtmlQuizzes() {
                 </div>
 
                 {/* Medium Quiz Card */}
-                <div className="border border-gray-300 rounded-lg p-6 shadow-md text-center hover:shadow-lg transition-shadow">
+                <div className="border border-gray-300 rounded-lg p-6 shadow-md text-center hover:shadow-lg transition-shadow relative">
+                    {mediumStatus && (
+                      <span className={`absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-semibold z-10 ${mediumStatus === 'completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                        {mediumStatus === 'completed' ? 'Completed' : 'Ongoing'}
+                      </span>
+                    )}
                     <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <span className="text-3xl">🌿</span>
                     </div>
@@ -50,7 +67,12 @@ export default function HtmlQuizzes() {
                 </div>
 
                 {/* Hard Quiz Card */}
-                <div className="border border-gray-300 rounded-lg p-6 shadow-md text-center hover:shadow-lg transition-shadow">
+                <div className="border border-gray-300 rounded-lg p-6 shadow-md text-center hover:shadow-lg transition-shadow relative">
+                    {hardStatus && (
+                      <span className={`absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-semibold z-10 ${hardStatus === 'completed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                        {hardStatus === 'completed' ? 'Completed' : 'Ongoing'}
+                      </span>
+                    )}
                     <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <span className="text-3xl">🌳</span>
                     </div>

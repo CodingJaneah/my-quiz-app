@@ -1,7 +1,7 @@
 "use client";
 
-import Header from "../../../../frontend/components/Header";
-import Footer from "@/frontend/components/Footer";
+import Header from "../../../../frontend/components/layout/Header";
+import Footer from "@/frontend/components/layout/Footer";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/frontend/context/AuthContext";
@@ -52,33 +52,44 @@ export default function HardCssQuiz() {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     /**
-     * Fetches quiz questions on component mount
+     * Fetches quiz questions and previous answers (if logged in) on component mount
      */
     useEffect(() => {
-        fetchQuestions();
-    }, []);
-
-    /**
-     * Fetches quiz questions from the API
-     */
-    const fetchQuestions = async () => {
-        try {
+        const fetchAll = async () => {
             setIsLoading(true);
-            const response = await fetch('/api/quiz?type=css&difficulty=hard');
-            const data = await response.json();
+            try {
+                // Fetch questions first
+                const response = await fetch('/api/quiz?type=css&difficulty=hard');
+                const data = await response.json();
+                if (data.success) {
+                    setQuestions(data.questions);
 
-            if (data.success) {
-                setQuestions(data.questions);
-            } else {
-                setError(data.error || 'Failed to load questions');
+                    // Then fetch previous answers if user is logged in
+                    if (user?.id) {
+                        const res = await fetch(`/api/user-answers?user_id=${user.id}&quiz_type=css&difficulty=hard`);
+                        if (res.ok) {
+                            const ansData = await res.json();
+                            if (ansData.answers && Array.isArray(ansData.answers) && ansData.answers.length > 0) {
+                                const prev: SelectedAnswers = {};
+                                ansData.answers.forEach((a: any) => {
+                                    prev[a.question_id] = a.selected_answer;
+                                });
+                                setSelectedAnswers(prev);
+                            }
+                        }
+                    }
+                } else {
+                    setError(data.error || 'Failed to load questions');
+                }
+            } catch (err) {
+                setError('Failed to connect to the server');
+                console.error('Error fetching questions:', err);
+            } finally {
+                setIsLoading(false);
             }
-        } catch (err) {
-            setError('Failed to connect to the server');
-            console.error('Error fetching questions:', err);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+        };
+        fetchAll();
+    }, [user]);
 
     /**
      * Handles answer selection
@@ -167,7 +178,9 @@ export default function HardCssQuiz() {
         setSelectedAnswers({});
         setCurrentQuestion(0);
         setQuizResult(null);
-        fetchQuestions();
+        if (typeof window !== 'undefined') {
+            window.location.reload();
+        }
     };
 
     // Loading state
@@ -195,7 +208,7 @@ export default function HardCssQuiz() {
                     <div className="text-center">
                         <p className="text-red-500 mb-4">{error}</p>
                         <button 
-                            onClick={fetchQuestions}
+                            onClick={() => window.location.reload()}
                             className="bg-(--secondary-color) hover:bg-(--hover-background) text-white py-2 px-6 rounded"
                         >
                             Try Again

@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import Header from "../frontend/components/Header";
-import Footer from "../frontend/components/Footer";
+import Header from "../frontend/components/layout/Header";
+import Footer from "../frontend/components/layout/Footer";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheck } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from "@/frontend/context/AuthContext";
@@ -41,14 +41,14 @@ export default function Home() {
 
         <div className="flex justify-center gap-12">
           <div>
-            <p><FontAwesomeIcon icon={faCheck} /> Take our quizzes to test your knowledge</p>
-            <p><FontAwesomeIcon icon={faCheck} /> Improve your coding skills and confidence</p>
-            <p><FontAwesomeIcon icon={faCheck} /> Access quizzes anytime, anywhere on any device</p>
+            <p><FontAwesomeIcon icon={faCheck} className="text-green-500"/> Take our quizzes to test your knowledge</p>
+            <p><FontAwesomeIcon icon={faCheck} className="text-green-500"/> Improve your coding skills and confidence</p>
+            <p><FontAwesomeIcon icon={faCheck} className="text-green-500"/> Access quizzes anytime, anywhere on any device</p>
           </div>
           <div className="text-features">
-            <p><FontAwesomeIcon icon={faCheck} /> Learn at your own pace with instant feedback</p>
-            <p><FontAwesomeIcon icon={faCheck} /> Track your progress and see your improvements</p>
-            <p><FontAwesomeIcon icon={faCheck} /> Master HTML, CSS, and JavaScript fundamentals</p>
+            <p><FontAwesomeIcon icon={faCheck} className="text-green-500"/> Learn at your own pace with instant feedback</p>
+            <p><FontAwesomeIcon icon={faCheck} className="text-green-500"/> Track your progress and see your improvements</p>
+            <p><FontAwesomeIcon icon={faCheck} className="text-green-500"/> Master HTML, CSS, and JavaScript fundamentals</p>
           </div>
         </div>
       </section>

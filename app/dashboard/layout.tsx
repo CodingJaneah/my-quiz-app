@@ -1,8 +1,8 @@
 "use client";
 
-import Header from "../../frontend/components/Header";
-import Footer from "@/frontend/components/Footer";
-import DashboardSidebar from "../../frontend/components/DashboardSidebar";
+import Header from "../../frontend/components/layout/Header";
+import Footer from "@/frontend/components/layout/Footer";
+import DashboardSidebar from "../../frontend/components/layout/DashboardSidebar";
 import { useAuth } from "../../frontend/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";

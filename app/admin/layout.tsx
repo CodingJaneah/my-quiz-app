@@ -42,8 +42,29 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             return;
         }
 
-        // TODO: Implement admin authentication logic here
-        setIsLoading(false);
+        // Check for admin_session cookie
+        if (typeof window !== "undefined") {
+            const cookieStr = document.cookie.split('; ').find(row => row.startsWith('admin_session='));
+            let session = null;
+            if (cookieStr) {
+                try {
+                    session = JSON.parse(decodeURIComponent(cookieStr.split('=')[1]));
+                } catch (e) {
+                    session = null;
+                }
+            }
+            if (session && session.id && session.role === "admin") {
+                setAdminUser({
+                    id: session.id,
+                    username: session.username || session.email?.split('@')[0] || "Admin",
+                    email: session.email || "admin@quizapp.com",
+                });
+                setIsLoading(false);
+            } else {
+                // Not authenticated, redirect to login
+                router.replace("/admin/login");
+            }
+        }
     }, [pathname, router]);
 
     // If on login page, render without sidebar
