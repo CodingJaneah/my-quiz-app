@@ -1,5 +1,5 @@
-import Footer from "@/frontend/components/Footer";
-import Header from "../../frontend/components/Header";
+import Footer from "@/frontend/components/layout/Footer";
+import Header from "../../frontend/components/layout/Header";
 import Link from "next/link";
 
 export default function Topics() {
